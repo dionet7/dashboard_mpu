@@ -10,3 +10,4 @@ font="sans serif"
 headless = true
 enableXsrfProtection = true
 enableCORS = false
+
