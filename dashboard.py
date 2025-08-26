@@ -14,7 +14,7 @@ with col_texto:
     st.markdown(
         """
         <h1 style='margin-bottom:0; color:#2C3E50;'>
-            Dados da Violência Doméstica
+            Dados Violência Doméstica - Processos Tramitando
         </h1>
         <h3 style='margin-top:0; color:#34495E;'>
             Comarca de Inhuma - PI
@@ -147,7 +147,9 @@ def carregar_dados(caminho: str) -> pd.DataFrame:
         "dt_distribuicao":  ["dt_distribuicao","data de distribuicao","data autuacao","data de autuacao"],
         "local_ocorrencia": ["local_ocorrencia","local ocorrencia","local de ocorrencia"],
         "bairro_localidade":["bairro_localidade","bairro localidade","bairro","localidade","bairro/localidade"],
+        "ds_assunto_principal": ["ds_assunto_principal","assunto principal","assunto_principal"]
     })
+
 
     # Unicidade por número do processo
     if "nr_processo" in df.columns:
@@ -246,6 +248,10 @@ bairros = st.sidebar.multiselect("Bairro/Localidade", bairros_opcoes)
 zonas_opcoes = sorted(df["Zona"].dropna().unique()) if "Zona" in df.columns else []
 zonas = st.sidebar.multiselect("Zona", zonas_opcoes)
 
+assuntos_opcoes = sorted(df["ds_assunto_principal"].dropna().unique()) if "ds_assunto_principal" in df.columns else []
+assuntos = st.sidebar.multiselect("Assunto Principal", assuntos_opcoes)
+
+
 # =========================
 # Aplicar filtros
 # =========================
@@ -263,6 +269,8 @@ if bairros and "bairro_localidade" in df_filtrado.columns:
     df_filtrado = df_filtrado[df_filtrado["bairro_localidade"].isin(bairros)]
 if zonas and "Zona" in df_filtrado.columns:
     df_filtrado = df_filtrado[df_filtrado["Zona"].isin(zonas)]
+if assuntos and "ds_assunto_principal" in df_filtrado.columns:
+    df_filtrado = df_filtrado[df_filtrado["ds_assunto_principal"].isin(assuntos)]
 
 # =========================
 # KPI principal
@@ -306,6 +314,17 @@ if pizza_zona is not None:
     )
 else:
     st.info("Sem dados de Zona nos filtros atuais.")
+
+# Donut: Assunto Principal
+st.subheader("📚 Distribuição por Assunto Principal")
+pizza_assunto = preparar_contagem(df_filtrado, "ds_assunto_principal", "Assunto Principal")
+if pizza_assunto is not None:
+    st.plotly_chart(
+        donut_fig(pizza_assunto, "Assunto Principal", "Total", "Distribuição por Assunto Principal"),
+        use_container_width=True
+    )
+else:
+    st.info("Sem dados de Assunto Principal nos filtros atuais.")
 
 # Sunburst Município → Bairro
 st.subheader("🌳 Hierarquia Município → Bairro")
